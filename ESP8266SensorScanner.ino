@@ -1,4 +1,4 @@
-MIT License
+/* MIT License
 
 Copyright (c) 2018 Dan Worth
 
@@ -19,17 +19,12 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+*/
 
 #include <ESP8266WiFi.h>
+#include "config.h"
 
-#define PREFIX "sensor"             // the prefix for the sensor Acess Points
-const char* ssid = "";              // the ssid of your wifi router
-const char* password = "";          // the password for above
-const char* serverName = "DCCpp32"; // the DCC++32 where status updates are delivered
-String host = "train01";
-const int trainNum = 1;
-int prevBlock = 0;
-int maxBlock = -1;
+int prevBlock = -1;
 
 WiFiClient  client;
 
@@ -37,11 +32,12 @@ int measureSignals(int NetworksFound)
 {
   char  Buffer[80];
   int   block, level, maxLevel = -127;
+  int   maxBlock = -1;
 
   for (int i = 0; i < NetworksFound; i++) {
     strcpy( Buffer, WiFi.SSID(i).c_str() );
-    if ( !strncmp( PREFIX, Buffer, strlen( PREFIX ) ) ) {
-      block = atoi( &Buffer[strlen(PREFIX)] );
+    if ( !strncmp( _PREFIX, Buffer, strlen( _PREFIX ) ) ) {
+      block = atoi( &Buffer[strlen(_PREFIX)] );
       level = WiFi.RSSI(i);
       if ( level > maxLevel ) {
         maxBlock = block;
@@ -55,12 +51,12 @@ int measureSignals(int NetworksFound)
 void connectToWiFi()
 {
   Serial.print("\n\nConnecting to ");
-  Serial.println(ssid);
+  Serial.println(_SSID);
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
-  WiFi.hostname( host );
-  WiFi.begin(ssid, password);
-  WiFi.hostname( host );
+  WiFi.hostname( _HOST );
+  WiFi.begin(_SSID, _PASSWORD);
+  WiFi.hostname( _HOST );
   while (WiFi.status() != WL_CONNECTED) {
     delay(500);
     Serial.print(".");
@@ -94,14 +90,15 @@ void loop() {   // scan for strongest signal and send to server
   if ( (numNetworks = WiFi.scanComplete()) == -2 )
     WiFi.scanNetworks(true);
   else if (numNetworks >= 0) {
-    client.connect( serverName, 2560 );
+    client.connect( _SERVER_NAME, 2560 );
     blockNum = measureSignals( numNetworks );
     WiFi.scanDelete();
-    if( (blockNum > 0) && client.connected() ) {
+    if( client.connected() ) {
       Serial.println( blockNum );
-      if( (blockNum != prevBlock) && prevBlock )
+      if( (blockNum != prevBlock) && (prevBlock > 0) )
         sendString( prevBlock, 0 );
-      sendString( blockNum, trainNum );
+      if( blockNum > 0 )
+        sendString( blockNum, _TRAIN_NUM );
       prevBlock = blockNum;
       client.stop();
     }
