@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 /* MIT License
+=======
+/*
+MIT License
+>>>>>>> e480748350d34baab2625d712e78f58096eadff5
 
 Copyright (c) 2018 Dan Worth
 
