@@ -19,45 +19,11 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <ESP8266WiFi.h>
-#include "config.h"
-#include "ScanSensors.h"
+class ScanSensors {
+  public:
+    static void init();
+    static int scan();
 
-int prevBlock = -1;
-
-WiFiClient  client;
-
-void sendString( int blockNum, int trainNum ) {
-  client.print( "<RS " );
-  client.print( blockNum );
-  client.print( " " );
-  client.print( trainNum );
-  client.print( ">" );
-}
-
-void setup() {
-  Serial.begin(115200);
-  Serial.println();
-
-  ScanSensors::init();
-}
-
-
-void loop() {   // scan for strongest signal and send to server
-  char c;
-  int numNetworks, blockNum;
-
-  if( (blockNum = ScanSensors::scan()) >= 0 ) {
-    if( !client.connected() )
-      client.connect( _SERVER_NAME, 2560 );
-    if( client.connected() ) {
-      Serial.println( blockNum );
-      if( (blockNum != prevBlock) && (prevBlock > 0) )
-        sendString( prevBlock, 0 );
-      if( blockNum > 0 )
-        sendString( blockNum, _TRAIN_NUM );
-      prevBlock = blockNum;
-      client.stop();
-    }
-  }
-}
+  private:
+    static int measureSignals(int);
+};
