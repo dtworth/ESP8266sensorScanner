@@ -19,25 +19,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#include <ESP8266WiFi.h>
-#include "config.h"
-#include "ScanSensors.h"
-#include "DeliverResults.h"
+#ifndef _DELIVER_RESULTS_H
+#define _DELIVER_RESULTS_H
 
-void setup() {
-  Serial.begin(115200);
-  Serial.println();
+class DeliverResult {
+  public:
+    void send( int blockNum );
+    void init( String serverName );
+  private:
+    void sendString( int blockNum, int trainNum );
+    int _prevBlock = -1;
+    int _newBlock = -1;
+    String  _serverName;
+    WiFiClient _client;
+};
 
-  ScanSensors::init();
-  DeliverResultsManager::init();
-}
+class DeliverResultsManager {
+  public:
+    static void init();
+    static void send( int blockNum );
+};
 
-
-void loop() {   // scan for strongest signal and send to server
-  char c;
-  int numNetworks, blockNum;
-
-  if( (blockNum = ScanSensors::scan()) >= 0 ) {
-    DeliverResultsManager::send( blockNum );
-  }
-}
+#endif

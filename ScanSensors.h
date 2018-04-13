@@ -19,6 +19,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#ifndef _SCAN_SENSORS_H
+#define _SCAN_SENSORS_H
+
 class ScanSensors {
   public:
     static void init();
@@ -27,3 +30,5 @@ class ScanSensors {
   private:
     static int measureSignals(int);
 };
+
+#endif

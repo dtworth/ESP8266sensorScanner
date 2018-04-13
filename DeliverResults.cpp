@@ -21,23 +21,43 @@ SOFTWARE.
 
 #include <ESP8266WiFi.h>
 #include "config.h"
-#include "ScanSensors.h"
 #include "DeliverResults.h"
 
-void setup() {
-  Serial.begin(115200);
-  Serial.println();
+String  serverNames[] = { _SERVER_NAMES };
+DeliverResult place[ sizeof( serverNames) ];
 
-  ScanSensors::init();
-  DeliverResultsManager::init();
+void DeliverResult::init( String serverName ) {
+  _serverName = serverName;
+}
+
+void DeliverResult::sendString( int blockNum, int trainNum ) {
+  _client.print( "<RS " );
+  _client.print( blockNum );
+  _client.print( " " );
+  _client.print( trainNum );
+  _client.print( ">" );
+}
+
+void DeliverResult::send( int blockNum ) {
+    if( !_client.connected() )
+      _client.connect( _serverName, 2560 );
+    if( _client.connected() ) {
+      Serial.println( blockNum );
+      if( (blockNum != _prevBlock) && (_prevBlock > 0) )
+        sendString( _prevBlock, 0 );
+      if( blockNum > 0 )
+        sendString( blockNum, _TRAIN_NUM );
+      _prevBlock = blockNum;
+      _client.stop();
+    }
 }
 
 
-void loop() {   // scan for strongest signal and send to server
-  char c;
-  int numNetworks, blockNum;
-
-  if( (blockNum = ScanSensors::scan()) >= 0 ) {
-    DeliverResultsManager::send( blockNum );
-  }
+void DeliverResultsManager::init() {
+  place[0].init( serverNames[0] );
 }
+
+void DeliverResultsManager::send( int blockNum ) {
+  place[0].send( blockNum );
+}
+
