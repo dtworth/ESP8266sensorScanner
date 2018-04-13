@@ -41,15 +41,20 @@ void DeliverResult::sendString( int blockNum, int trainNum ) {
 void DeliverResult::send( int blockNum ) {
     if( !_client.connected() )
       _client.connect( _serverName, 2560 );
-    if( _client.connected() ) {
-      Serial.println( blockNum );
-      if( (blockNum != _prevBlock) && (_prevBlock > 0) )
-        sendString( _prevBlock, 0 );
-      if( blockNum > 0 )
-        sendString( blockNum, _TRAIN_NUM );
-      _prevBlock = blockNum;
-      _client.stop();
+    
+    if( blockNum == _newBlock ) { // same block reported twice in a row
+      if( _client.connected() ) {
+        Serial.println( blockNum );
+        if( (blockNum != _prevBlock) && (_prevBlock > 0) )
+          sendString( _prevBlock, 0 );
+        if( blockNum > 0 )
+          sendString( blockNum, _TRAIN_NUM );
+        _prevBlock = blockNum;
+        _client.stop();
+      }
     }
+    else
+      _newBlock = blockNum;
 }
 
 
