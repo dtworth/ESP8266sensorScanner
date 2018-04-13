@@ -23,6 +23,8 @@ SOFTWARE.
 #include "config.h"
 #include "ScanSensors.h"
 
+long lastScanTime = 0;
+
 void ScanSensors::init() {
   Serial.print("\n\nConnecting to ");
   Serial.println(_SSID);
@@ -44,9 +46,13 @@ void ScanSensors::init() {
 
 int ScanSensors::scan() {
   int numNetworks, blockNum = -1;
-  
-  if ( (numNetworks = WiFi.scanComplete()) == -2 )
-    WiFi.scanNetworks(true);
+
+  if ( (numNetworks = WiFi.scanComplete()) == -2 ) {
+    if ( millis() > lastScanTime + _SCAN_INTERVAL ) {
+      lastScanTime = millis();
+      WiFi.scanNetworks(true, false, _SENSOR_CHANNEL );
+    }
+  }
   else if (numNetworks >= 0) {
     blockNum = measureSignals( numNetworks );
     WiFi.scanDelete();
