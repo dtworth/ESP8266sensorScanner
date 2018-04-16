@@ -31,6 +31,8 @@ class DeliverResult {
     int _prevBlock = -1;
     int _newBlock = -1;
     String  _serverName;
+    long  _lastConnectionTime = 0;
+    int _retryCount;
     WiFiClient _client;
 };
 

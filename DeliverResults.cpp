@@ -40,10 +40,14 @@ void DeliverResult::sendString( int blockNum, int trainNum ) {
 
 void DeliverResult::send( int blockNum ) {
     if( blockNum == _newBlock ) { // same block reported twice in a row
-      if( !_client.connected() )
+      if( !_client.connected() && (millis() > _lastConnectionTime + _RECONNECT_INTERVAL) && ( _retryCount < _MAX_RETRIES ) ) {
         _client.connect( _serverName, 2560 );
+        _lastConnectionTime = millis();   // update whether it connects or not
+        _retryCount++;
+      }
       if( _client.connected() ) {
-        Serial.println( blockNum );
+        _lastConnectionTime = 0;          // insure that next connection occurs quickly
+        _retryCount = 0;
         if( (blockNum != _prevBlock) && (_prevBlock > 0) )
           sendString( _prevBlock, 0 );
         if( blockNum > 0 )
