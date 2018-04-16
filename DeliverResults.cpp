@@ -23,8 +23,8 @@ SOFTWARE.
 #include "config.h"
 #include "DeliverResults.h"
 
-String  serverNames[] = { _SERVER_NAMES };
-DeliverResult place[ sizeof( serverNames) ];
+std::vector<String>  serverNames = { _SERVER_NAMES };
+DeliverResult place[ _MAX_SERVER_NAMES  ];
 
 void DeliverResult::init( String serverName ) {
   _serverName = serverName;
@@ -58,10 +58,12 @@ void DeliverResult::send( int blockNum ) {
 
 
 void DeliverResultsManager::init() {
-  place[0].init( serverNames[0] );
+  for( int i=0; i<serverNames.size(); i++ )
+    place[i].init( serverNames[i] );
 }
 
 void DeliverResultsManager::send( int blockNum ) {
-  place[0].send( blockNum );
+  for( int i=0; i<serverNames.size(); i++ )
+    place[i].send( blockNum );
 }
 
