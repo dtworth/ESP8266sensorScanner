@@ -24,6 +24,7 @@ SOFTWARE.
 #include "config.h"
 #include "ScanSensors.h"
 #include "DeliverResults.h"
+#include "Lights.h"
 
 ESP8266WebServer server(80);
 ADC_MODE(ADC_VCC);      // set A0 to read VCC
@@ -31,30 +32,76 @@ ADC_MODE(ADC_VCC);      // set A0 to read VCC
 void handleRoot()
 {
   char buff[20];
+  int speed=0;
+  bool left=0, right=0, brake=0, emergency=0;
+
+  LightsManager::leftTurn(0);
+  LightsManager::rightTurn(0);
+  LightsManager::emergencyLights(0);
+  LightsManager::brakeLights(0);
+
+  for(int i=0;i<server.args();i++) {
+    if( !strcmp( server.argName(i).c_str(), "speed" ) ) {
+      speed = server.arg(i).toInt();
+      if( speed < 0 )
+        speed = 0;
+      else if( speed > 1023 )
+        speed = 1023;
+    }
+    else if( !strcmp( server.argName(i).c_str(), "left" ) ) {
+      left = 1;
+      LightsManager::leftTurn(1);
+    }
+    else if( !strcmp( server.argName(i).c_str(), "right" ) ) {
+      right = 1;
+      LightsManager::rightTurn(1);
+    }
+    else if( !strcmp( server.argName(i).c_str(), "emergency" ) ) {
+      emergency = 1;
+      LightsManager::emergencyLights(1);
+    }
+    else if( !strcmp( server.argName(i).c_str(), "brake" ) ) {
+      brake = 1;
+      LightsManager::brakeLights(1);
+    }
+  }
 
   int vccVoltage = ESP.getVcc();
-  int speed = server.arg(0).toInt();
-  if( speed < 0 )
-    speed = 0;
-  else if( speed > 1023 )
-    speed = 1023;
   analogWrite(1, 1023 - speed);    // use the Tx pin for output
+
   String message = "<html><body>\n"; 
   message += "<h1>Car 01</h1>\n"; 
   message += "<form method='GET'>\n";
+
   message += "<p>Vcc=";  
   message += itoa( vccVoltage, buff, 10 );
   message += "</p>";  
-  message += "<p>D0=";  
-  message += digitalRead(0) ? "1": "0";  
-  message += "</p>";  
-  message += "<p>D2=";  
-  message += digitalRead(2) ? "1": "0";  
-  message += "</p>";
+
+  message += "<p>Left Turn? <input type='checkbox' ";
+  if( left )
+    message += "checked ";
+  message += " name='left'/></p>";
+
+  message += "<p>Right Turn? <input type='checkbox' ";
+  if( right )
+    message += "checked ";
+  message += " name='right'/></p>";
+
+  message += "<p>Emergency Lights? <input type='checkbox' ";
+  if( emergency )
+    message += "checked ";
+  message += " name='emergency'/></p>";
+
+  message += "<p>Brake Lights? <input type='checkbox' ";
+  if( brake )
+    message += "checked ";
+  message += " name='brake'/></p>";
+
   message += "<p>D3(Rx)=";  
   message += digitalRead(3) ? "1": "0";  
   message += "</p>";  
-  message += "<p>Speed (0-1023): <input type='text' value='";
+  
+  message += "<p>Speed (0-1023): <input type='range' min='0' max='1024' step='64' value='";
   message += itoa( speed, buff, 10 );
   message += "' name='speed'/></p>";
   message += "<input type='submit' value='Update'/>";
@@ -69,6 +116,7 @@ void setup() {
 
   ScanSensors::init();
   DeliverResultsManager::init();
+  LightsManager::init();
 }
 
 
