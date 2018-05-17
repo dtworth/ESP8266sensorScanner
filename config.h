@@ -9,3 +9,4 @@
 #define _SERVER_NAMES "DCCpp32", "sensor01", "sensor02" // servers where status updates are delivered
 #define _RECONNECT_INTERVAL 10000 // time to wait, in milliseconds, before trying to reconnect to an unresponsive server
 #define _MAX_RETRIES  10       // maximum times that the scanner will try to reach a given server
+#define _SPEED_CHANGE_RATE  10  // maximum speed change in % per second

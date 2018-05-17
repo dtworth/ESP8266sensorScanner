@@ -22,11 +22,10 @@ SOFTWARE.
 #include <ESP8266WiFi.h>
 #include <Ticker.h>
 #include "config.h"
-#include "DeliverResults.h"
 #include "Lights.h"
 
 Ticker blinker;         // timer for turn signals
-Lights leftLight(0), rightLight(2);
+Lights leftLight(2), rightLight(0);
 
 Lights::Lights( int pin ) {
   pinNum = pin;
@@ -72,7 +71,7 @@ void Lights::bright() {
 }
 
 void Lights::dim() {
-  analogWrite( pinNum, 320 );
+  analogWrite( pinNum, 640 );
 }
 
 void Lights::off() {

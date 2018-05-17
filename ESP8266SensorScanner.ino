@@ -25,6 +25,7 @@ SOFTWARE.
 #include "ScanSensors.h"
 #include "DeliverResults.h"
 #include "Lights.h"
+#include "Motor.h"
 
 ESP8266WebServer server(80);
 ADC_MODE(ADC_VCC);      // set A0 to read VCC
@@ -45,8 +46,9 @@ void handleRoot()
       speed = server.arg(i).toInt();
       if( speed < 0 )
         speed = 0;
-      else if( speed > 1023 )
-        speed = 1023;
+      else if( speed > 100 )
+        speed = 100;
+      Motor::setSpeed( speed );
     }
     else if( !strcmp( server.argName(i).c_str(), "left" ) ) {
       left = 1;
@@ -67,7 +69,6 @@ void handleRoot()
   }
 
   int vccVoltage = ESP.getVcc();
-  analogWrite(1, 1023 - speed);    // use the Tx pin for output
 
   String message = "<html><body>\n"; 
   message += "<h1>Car 01</h1>\n"; 
@@ -101,7 +102,7 @@ void handleRoot()
   message += digitalRead(3) ? "1": "0";  
   message += "</p>";  
   
-  message += "<p>Speed (0-1023): <input type='range' min='0' max='1024' step='64' value='";
+  message += "<p>Speed (0-100): <input type='range' min='0' max='100' step='5' value='";
   message += itoa( speed, buff, 10 );
   message += "' name='speed'/></p>";
   message += "<input type='submit' value='Update'/>";
@@ -117,6 +118,7 @@ void setup() {
   ScanSensors::init();
   DeliverResultsManager::init();
   LightsManager::init();
+  Motor::init();
 }
 
 
@@ -128,4 +130,5 @@ void loop() {   // scan for strongest signal and send to server
     DeliverResultsManager::send( blockNum );
   }
   server.handleClient();
+  Motor::update();
 }
