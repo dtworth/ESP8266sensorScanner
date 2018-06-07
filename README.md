@@ -1,3 +1,1 @@
-More information about this can be found here:
-
-https://sites.google.com/site/wifiblockdetection/
+More information about this can be found in the Wiki
