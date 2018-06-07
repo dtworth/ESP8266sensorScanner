@@ -1,3 +1,5 @@
-More information about this can be found here:
+More information about this can be found in the Wiki and here:
+
+https://sites.google.com/view/fallervehicles/home
 
 https://sites.google.com/site/wifiblockdetection/
