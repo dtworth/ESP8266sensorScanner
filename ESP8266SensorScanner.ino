@@ -28,6 +28,7 @@ SOFTWARE.
 #include "Motor.h"
 
 ESP8266WebServer server(80);
+
 ADC_MODE(ADC_VCC);      // set A0 to read VCC
 
 void handleRoot()
@@ -130,5 +131,9 @@ void loop() {   // scan for strongest signal and send to server
     DeliverResultsManager::send( blockNum );
   }
   server.handleClient();
+  if( digitalRead(3) )
+    Motor::setResume();
+  else
+    Motor::setEstop();
   Motor::update();
 }

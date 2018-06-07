@@ -29,6 +29,7 @@ class Motor {
     static void  setSpeed(int speed);
     static void  setStop();
     static void  setEstop();
+    static void  setResume();
 };
 
 #endif _MOTOR_H

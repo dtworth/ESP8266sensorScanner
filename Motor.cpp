@@ -22,16 +22,19 @@ SOFTWARE.
 #include "config.h"
 #include "Motor.h"
 
-int _targetSpeed;
-int _prevSpeed;
-long _lastCheckTime;
+int _targetSpeed = 0 ;
+int _prevSpeed = 0 ;
+int _resumeSpeed = 0;
+long _lastCheckTime = 0L;
+bool _motorStopped = true;
 
 void Motor::init(){
-  setEstop();
 }
 
 void Motor::update(){
- 
+
+  if( _motorStopped )
+    return;
   int speedIncrement = _SPEED_CHANGE_RATE * (millis() - _lastCheckTime) / 1000;
   if( speedIncrement ) {
     if( _prevSpeed < _targetSpeed ) {
@@ -57,13 +60,22 @@ void Motor::setSpeed(int speed){
 }
 
 void Motor::setStop(){
+  if( !_motorStopped )
+    _resumeSpeed = _targetSpeed;
+  _motorStopped = true;
   setSpeed(0);
 }
 
 void Motor::setEstop(){
-  setSpeed(0);
+  setStop();
   _prevSpeed = 0;
   analogWrite( 1, 1024 );
 }
 
+void Motor::setResume(){
+  if( _motorStopped ) {
+    setSpeed( _resumeSpeed );
+    _motorStopped = false;
+  }
+}
 
