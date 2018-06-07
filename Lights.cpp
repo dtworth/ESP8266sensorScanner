@@ -71,7 +71,7 @@ void Lights::bright() {
 }
 
 void Lights::dim() {
-  analogWrite( pinNum, 640 );
+  analogWrite( pinNum, 768 );
 }
 
 void Lights::off() {

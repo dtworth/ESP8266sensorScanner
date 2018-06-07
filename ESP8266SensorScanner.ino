@@ -131,9 +131,13 @@ void loop() {   // scan for strongest signal and send to server
     DeliverResultsManager::send( blockNum );
   }
   server.handleClient();
-  if( digitalRead(3) )
+  if( digitalRead(3) ) {
     Motor::setResume();
-  else
+    LightsManager::brakeLights(false);
+  }
+  else {
     Motor::setEstop();
+    LightsManager::brakeLights(true);
+  }
   Motor::update();
 }
