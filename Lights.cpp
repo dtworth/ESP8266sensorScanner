@@ -25,7 +25,7 @@ SOFTWARE.
 #include "Lights.h"
 
 Ticker blinker;         // timer for turn signals
-Lights leftLight(2), rightLight(0);
+Lights leftLight(0), rightLight(2);
 
 Lights::Lights( int pin ) {
   pinNum = pin;
@@ -85,6 +85,28 @@ void LightsManager::init(){
 void LightsManager::update(){
   leftLight.update();
   rightLight.update();
+}
+
+void LightsManager::process(char *cmd) {
+  int cab;
+  int fByte, eByte;
+  int nParams;
+  
+  nParams=sscanf(cmd,"%d %d %d",&cab,&fByte,&eByte);
+  
+  if(nParams<2)
+    return;
+
+  if(nParams==2){                      // this is a request for functions FL,F1-F12  
+    // headlight on/off (FL) would go here
+  } else {                              // this is a request for functions F13-F28
+    if( fByte == 0xDF ) {               // (F21-F28)
+      brakeLights( eByte & 0x01 );      // F21
+      leftTurn( eByte & 0x02 );         // F22
+      rightTurn( eByte & 0x04 );        // F23
+      emergencyLights( eByte & 0x08 );  // F24
+    }
+  }
 }
 
 void LightsManager::leftTurn(bool state){

@@ -23,11 +23,12 @@ SOFTWARE.
 #include <ESP8266WebServer.h>
 #include "config.h"
 #include "ScanSensors.h"
+#include "WifiCommand.h"
 #include "DeliverResults.h"
 #include "Lights.h"
 #include "Motor.h"
 
-ESP8266WebServer server(80);
+ESP8266WebServer webServer(80);
 
 ADC_MODE(ADC_VCC);      // set A0 to read VCC
 
@@ -42,28 +43,24 @@ void handleRoot()
   LightsManager::emergencyLights(0);
   LightsManager::brakeLights(0);
 
-  for(int i=0;i<server.args();i++) {
-    if( !strcmp( server.argName(i).c_str(), "speed" ) ) {
-      speed = server.arg(i).toInt();
-      if( speed < 0 )
-        speed = 0;
-      else if( speed > 100 )
-        speed = 100;
+  for(int i=0;i<webServer.args();i++) {
+    if( !strcmp( webServer.argName(i).c_str(), "speed" ) ) {
+      speed = webServer.arg(i).toInt();
       Motor::setSpeed( speed );
     }
-    else if( !strcmp( server.argName(i).c_str(), "left" ) ) {
+    else if( !strcmp( webServer.argName(i).c_str(), "left" ) ) {
       left = 1;
       LightsManager::leftTurn(1);
     }
-    else if( !strcmp( server.argName(i).c_str(), "right" ) ) {
+    else if( !strcmp( webServer.argName(i).c_str(), "right" ) ) {
       right = 1;
       LightsManager::rightTurn(1);
     }
-    else if( !strcmp( server.argName(i).c_str(), "emergency" ) ) {
+    else if( !strcmp( webServer.argName(i).c_str(), "emergency" ) ) {
       emergency = 1;
       LightsManager::emergencyLights(1);
     }
-    else if( !strcmp( server.argName(i).c_str(), "brake" ) ) {
+    else if( !strcmp( webServer.argName(i).c_str(), "brake" ) ) {
       brake = 1;
       LightsManager::brakeLights(1);
     }
@@ -108,15 +105,16 @@ void handleRoot()
   message += "' name='speed'/></p>";
   message += "<input type='submit' value='Update'/>";
   message += "</form></body></html>\n";
-  server.send(200, "text/html", message);
+  webServer.send(200, "text/html", message);
 }
 
 
 void setup() {
-  server.on( "/", handleRoot );
-  server.begin();
+  webServer.on( "/", handleRoot );
+  webServer.begin();
 
   ScanSensors::init();
+  WiFiCommand::init();
   DeliverResultsManager::init();
   LightsManager::init();
   Motor::init();
@@ -130,14 +128,11 @@ void loop() {   // scan for strongest signal and send to server
   if( (blockNum = ScanSensors::scan()) >= 0 ) {
     DeliverResultsManager::send( blockNum );
   }
-  server.handleClient();
-  if( digitalRead(3) ) {
+  webServer.handleClient();
+  WiFiCommand::process();   // check for, and process, and new WiFi commands
+  if( digitalRead(3) )
     Motor::setResume();
-    LightsManager::brakeLights(false);
-  }
-  else {
+  else
     Motor::setEstop();
-    LightsManager::brakeLights(true);
-  }
   Motor::update();
 }

@@ -26,6 +26,7 @@ class Motor {
   public:
     static void  init();
     static void  update();
+    static void  process(char *);
     static void  setSpeed(int speed);
     static void  setStop();
     static void  setEstop();

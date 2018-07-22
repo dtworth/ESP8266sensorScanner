@@ -20,7 +20,9 @@ SOFTWARE.
 */
 #include <ESP8266WiFi.h>
 #include "config.h"
+#include "WiFiCommand.h"
 #include "Motor.h"
+#include "Lights.h"
 
 int _targetSpeed = 0 ;
 int _prevSpeed = 0 ;
@@ -38,13 +40,16 @@ void Motor::update(){
   int speedIncrement = _SPEED_CHANGE_RATE * (millis() - _lastCheckTime) / 1000;
   if( speedIncrement ) {
     if( _prevSpeed < _targetSpeed ) {
+      LightsManager::brakeLights(false);
       _prevSpeed += speedIncrement;
       if( _prevSpeed > _targetSpeed )
         _prevSpeed = _targetSpeed;
     }
-    else if ( _prevSpeed > _targetSpeed ) {
-      if( _targetSpeed == 0 )   // brake applied
+    else if ( _prevSpeed >= _targetSpeed ) {
+      if( _targetSpeed == 0 ) {  // brake applied
+        LightsManager::brakeLights(true);
         speedIncrement *= 2;
+      }
       _prevSpeed -= speedIncrement;
       if( _prevSpeed < _targetSpeed )
         _prevSpeed = _targetSpeed;
@@ -54,7 +59,32 @@ void Motor::update(){
   }
 }
 
+void Motor::process(char *cmd) {
+    int nReg;
+    int cab;
+    int tSpeed;
+    int tDirection;
+
+    if(sscanf(cmd,"%d %d %d %d",&nReg,&cab,&tSpeed,&tDirection)!=4)
+      return;
+    if( tSpeed == -1 )
+      setEstop();
+    else
+      setSpeed( tSpeed * 100 / 126 );
+    
+    WiFiCommand::print("<T");
+    WiFiCommand::print(nReg); WiFiCommand::print(" ");
+    WiFiCommand::print(tSpeed); WiFiCommand::print(" ");
+    WiFiCommand::print(tDirection);
+    WiFiCommand::print(">");
+  
+}
+
 void Motor::setSpeed(int speed){
+  if( speed < 0 )
+    speed = 0;
+  else if( speed > 100 )
+    speed = 100;
   _targetSpeed = speed;
   _lastCheckTime = millis();
 }

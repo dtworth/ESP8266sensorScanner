@@ -44,6 +44,7 @@ class LightsManager {
   public:
     static void init();
     static void update();
+    static void process(char *);
     static void leftTurn(bool);
     static void rightTurn(bool);
     static void brakeLights(bool);
