@@ -49,6 +49,9 @@ class LightsManager {
     static void rightTurn(bool);
     static void brakeLights(bool);
     static void emergencyLights(bool);
+    static void tailLights(bool);
+    static void headLights(bool);
+    static void brightLights(bool);
 };
 
 #endif

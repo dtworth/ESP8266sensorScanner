@@ -25,7 +25,7 @@ SOFTWARE.
 #include "Lights.h"
 
 Ticker blinker;         // timer for turn signals
-Lights leftLight(0), rightLight(2);
+Lights leftLight(_LEFT_PIN), rightLight(_RIGHT_PIN), brakeLight(_BRAKE_PIN);
 
 Lights::Lights( int pin ) {
   pinNum = pin;
@@ -49,8 +49,8 @@ void Lights::update() {
     if( brakeState )
       bright();
     else
-      dim();
-    blinkState = 0;    
+      off();
+    blinkState = 0;   
   }
 }
 
@@ -71,7 +71,7 @@ void Lights::bright() {
 }
 
 void Lights::dim() {
-  analogWrite( pinNum, 768 );
+  analogWrite( pinNum, 511 );
 }
 
 void Lights::off() {
@@ -80,11 +80,14 @@ void Lights::off() {
 
 void LightsManager::init(){
   blinker.attach(0.3, LightsManager::update);
+  analogWriteFreq( 600 );     // looks like 2400 baud to the IR reciever
+  analogWrite( _IR_PIN, 511 );  // pattern of 0101010
 }
 
 void LightsManager::update(){
   leftLight.update();
   rightLight.update();
+  brakeLight.update();
 }
 
 void LightsManager::process(char *cmd) {
@@ -122,13 +125,11 @@ void LightsManager::rightTurn(bool state){
 }
 
 void LightsManager::brakeLights(bool state){
-  leftLight.setBrakeState(state);
-  rightLight.setBrakeState(state);
+  brakeLight.setBrakeState(state);
 }
 
 void LightsManager::emergencyLights(bool state) {
-  leftLight.setEmergencyState(state);
-  rightLight.setEmergencyState(state);
+  brakeLight.setEmergencyState(state);
 }
 
 
