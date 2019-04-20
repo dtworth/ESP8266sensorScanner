@@ -31,28 +31,35 @@ void DeliverResult::init( String serverName ) {
 }
 
 void DeliverResult::sendString( int blockNum, int trainNum ) {
-  _client.print( "<RS " );
-  _client.print( blockNum );
-  _client.print( " " );
-  _client.print( trainNum );
-  _client.print( ">" );
+  char buffer[80];
+
+  sprintf( buffer, "<RS %i %i>", blockNum, trainNum );
+  _client.print( buffer );
 }
 
 void DeliverResult::send( int blockNum ) {
     if( blockNum == _newBlock ) { // same block reported twice in a row
       if( !_client.connected() && (millis() > _lastConnectionTime + _RECONNECT_INTERVAL) && ( _retryCount < _MAX_RETRIES ) ) {
         _client.connect( _serverName, 2560 );
+        Serial.print( "Connect to " );
+        Serial.println( _serverName );
         _lastConnectionTime = millis();   // update whether it connects or not
         _retryCount++;
       }
       if( _client.connected() ) {
+        Serial.print( "Connected to " );
+        Serial.println( _serverName );
         _lastConnectionTime = 0;          // insure that next connection occurs quickly
         _retryCount = 0;
         if( (blockNum != _prevBlock) && (_prevBlock > 0) )
           sendString( _prevBlock, 0 );
-        if( blockNum > 0 )
+        if( blockNum > 0 ) {
           sendString( blockNum, _TRAIN_NUM );
+          Serial.print( "Send String to " );
+          Serial.println( _serverName );
+        }
         _prevBlock = blockNum;
+        delay(100);
         _client.stop();
       }
     }
