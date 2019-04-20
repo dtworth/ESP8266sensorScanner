@@ -31,11 +31,11 @@ void DeliverResult::init( String serverName ) {
 }
 
 void DeliverResult::sendString( int blockNum, int trainNum ) {
-  _client.print( "<RS " );
-  _client.print( blockNum );
-  _client.print( " " );
-  _client.print( trainNum );
-  _client.print( ">" );
+  char buffer[80];
+
+  sprintf( buffer, "<RS %i %i>", blockNum, trainNum );
+  _client.print( buffer );
+  
 }
 
 void DeliverResult::send( int blockNum ) {
@@ -53,6 +53,7 @@ void DeliverResult::send( int blockNum ) {
         if( blockNum > 0 )
           sendString( blockNum, _TRAIN_NUM );
         _prevBlock = blockNum;
+        delay(100);
         _client.stop();
       }
     }
