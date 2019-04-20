@@ -29,14 +29,17 @@ int _prevSpeed = 0 ;
 int _resumeSpeed = 0;
 long _lastCheckTime = 0L;
 bool _motorStopped = true;
+int _maxSpeed = 100;
 
 void Motor::init(){
 }
 
 void Motor::update(){
 
-  if( _motorStopped )
+  if( _motorStopped ) {
+    LightsManager::brakeLights(true);
     return;
+  }
   int speedIncrement = _SPEED_CHANGE_RATE * (millis() - _lastCheckTime) / 1000;
   if( speedIncrement ) {
     if( _prevSpeed < _targetSpeed ) {
@@ -45,7 +48,7 @@ void Motor::update(){
       if( _prevSpeed > _targetSpeed )
         _prevSpeed = _targetSpeed;
     }
-    else if ( _prevSpeed >= _targetSpeed ) {
+    else {
       if( _targetSpeed == 0 ) {  // brake applied
         LightsManager::brakeLights(true);
         speedIncrement *= 2;
@@ -70,23 +73,25 @@ void Motor::process(char *cmd) {
     if( tSpeed == -1 )
       setEstop();
     else
-      setSpeed( tSpeed * 100 / 126 );
-    
+      setTargetSpeed( tSpeed * 100 / 126 );
+/*
     WiFiCommand::print("<T");
     WiFiCommand::print(nReg); WiFiCommand::print(" ");
     WiFiCommand::print(tSpeed); WiFiCommand::print(" ");
     WiFiCommand::print(tDirection);
     WiFiCommand::print(">");
-  
+*/
 }
 
-void Motor::setSpeed(int speed){
+void Motor::setTargetSpeed(int speed){
   if( speed < 0 )
     speed = 0;
-  else if( speed > 100 )
-    speed = 100;
+  else if( speed > _maxSpeed )
+    speed = _maxSpeed;
   _targetSpeed = speed;
   _lastCheckTime = millis();
+  if( _targetSpeed > 0 )
+    _motorStopped = false;
 }
 
 void Motor::setStop(){
@@ -100,12 +105,34 @@ void Motor::setEstop(){
   setStop();
   _prevSpeed = 0;
   analogWrite( 1, 1024 );
+  LightsManager::brakeLights(true);
 }
 
 void Motor::setResume(){
-  if( _motorStopped ) {
-    setSpeed( _resumeSpeed );
+  if( _motorStopped && _resumeSpeed ) {
+    setTargetSpeed( _resumeSpeed );
     _motorStopped = false;
   }
 }
+
+void Motor::setMaxSpeed( int speed ){
+  if( speed < 0 )
+    speed = 0;
+  else if( speed > 100 )
+    speed = 100;
+  _maxSpeed = speed;
+  if( _maxSpeed < _targetSpeed ) {
+    _targetSpeed = _maxSpeed;
+    _lastCheckTime = millis();
+  }
+}
+
+void Motor::setSpeed(int speed){
+  if( speed < 0 )
+    speed = 0;
+  else if( speed > _maxSpeed )
+    speed = _maxSpeed;
+  _lastCheckTime = millis();
+}
+
 

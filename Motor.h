@@ -27,10 +27,13 @@ class Motor {
     static void  init();
     static void  update();
     static void  process(char *);
-    static void  setSpeed(int speed);
+    static void  setTargetSpeed(int speed);
     static void  setStop();
     static void  setEstop();
     static void  setResume();
+    static void  setMaxSpeed(int speed);
+  private:
+    static void  setSpeed(int speed);
 };
 
 #endif _MOTOR_H

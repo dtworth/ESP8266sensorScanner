@@ -46,7 +46,7 @@ void handleRoot()
   for(int i=0;i<webServer.args();i++) {
     if( !strcmp( webServer.argName(i).c_str(), "speed" ) ) {
       speed = webServer.arg(i).toInt();
-      Motor::setSpeed( speed );
+      Motor::setTargetSpeed( speed );
     }
     else if( !strcmp( webServer.argName(i).c_str(), "left" ) ) {
       left = 1;
