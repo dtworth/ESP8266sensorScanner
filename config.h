@@ -12,3 +12,13 @@
 #define _SPEED_CHANGE_RATE  10  // maximum speed change in % per second
 #define _ETHERNET_PORT 2560
 
+#define _IR_PIN       2
+#define _BRAKE_PIN    0
+#define _LEFT_PIN     12
+#define _RIGHT_PIN    13
+#define _HEAD_PIN     14
+#define _TAIL_PIN     16
+#define _IR_SENS_PIN  3
+#define _SENS2_PIN    4
+#define _SENS3_PIN    5
+
