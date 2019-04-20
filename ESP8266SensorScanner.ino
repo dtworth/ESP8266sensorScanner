@@ -120,11 +120,24 @@ void setup() {
   Motor::init();
 }
 
+int count = 0;
+int lastVoltChk = 0;
 
 void loop() {   // scan for strongest signal and send to server
   char c;
-  int numNetworks, blockNum;
+  int numNetworks, blockNum, vccVoltage;
 
+  if( millis() > lastVoltChk + 10000 ) {
+    vccVoltage = ESP.getVcc();
+    lastVoltChk = millis();
+    if( vccVoltage < 3200 ) {
+      LightsManager::emergencyLights( true );
+      Motor::setMaxSpeed( 50 );
+    }
+    if( vccVoltage < 3100 ) {
+      ESP.deepSleep(30e6);
+    }
+  }
   if( (blockNum = ScanSensors::scan()) >= 0 ) {
     DeliverResultsManager::send( blockNum );
   }
