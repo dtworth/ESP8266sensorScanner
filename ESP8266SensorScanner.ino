@@ -22,6 +22,7 @@ SOFTWARE.
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include "config.h"
+//#include "Cvariables.h"
 #include "ScanSensors.h"
 #include "WifiCommand.h"
 #include "DeliverResults.h"
@@ -113,11 +114,13 @@ void setup() {
   webServer.on( "/", handleRoot );
   webServer.begin();
 
+//  Cvariable::initCVs();
   ScanSensors::init();
   WiFiCommand::init();
   DeliverResultsManager::init();
   LightsManager::init();
   Motor::init();
+  Motor::setEstop();
 }
 
 int count = 0;
@@ -134,9 +137,9 @@ void loop() {   // scan for strongest signal and send to server
       LightsManager::emergencyLights( true );
       Motor::setMaxSpeed( 50 );
     }
-    if( vccVoltage < 3100 ) {
-      ESP.deepSleep(30e6);
-    }
+//    if( vccVoltage < 3100 ) {
+//      ESP.deepSleep(30e6);
+//    }
   }
   if( (blockNum = ScanSensors::scan()) >= 0 ) {
     DeliverResultsManager::send( blockNum );

@@ -19,6 +19,7 @@ Part of DCC++ BASE STATION for the Arduino
 #include "WiFiCommand.h"
 #include "Motor.h"
 #include "Lights.h"
+//#include "Cvariables.h"
 //#include "Sensor.h"
 //#include "RemoteSensor.h"
 //#include "EEStore.h"
@@ -131,9 +132,19 @@ void WiFiCommand::parse(char *com){
  */
       LightsManager::process(com+1);
       break;
-
-
-
+ /*
+    case 'R':     // <R CV CALLBACKNUM CALLBACKSUB>
+      Cvariable::readCV(com+1);
+      break;
+    case 'w':      // <w CAB CV VALUE>
+    case 'W':      // <W CV VALUE CALLBACKNUM CALLBACKSUB>
+      Cvariable::writeCV(com+1);
+      break;
+    case 'b':      // <b CAB CV BIT VALUE>
+    case 'B':      // <B CV BIT VALUE CALLBACKNUM CALLBACKSUB>
+      Cvariable::writeb(com+1);
+      break;
+*/
     case 's':      // <s>
 /*
  *    returns status messages containing track power status, throttle status, turn-out status, and a version number
@@ -198,16 +209,8 @@ void WiFiCommand::parse(char *com){
  *    
  *    returns: a carriage return
 */
-      WiFiCommand::print("\r\l");
+      WiFiCommand::print("\r\n");
       break;  
-//    case 'R': 
-//      if( com[1] == 'S' )
-/*   
- *   *** SEE REMOTESENSOR.CPP FOR COMPLETE INFO ON THE DIFFERENT VARIATIONS OF THE "RS" COMMAND
- *   USED TO CREATE/EDIT/REMOVE/SHOW SENSOR DEFINITIONS
- */
-//        RemoteSensor::parse(com+2);
-      break;
   } // switch
 }; // WiFiCommand::parse
 
